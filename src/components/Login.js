@@ -1,19 +1,26 @@
 import { set } from "lodash";
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { loginApi } from "../service/UserService";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
+
 const Login = () =>{
+    const {loginContext} = useContext(UserContext);
     let navigate = useNavigate();
+    const {logout} = useContext(UserContext);
     const[email,setEmail]=useState("");
     const[password,setPassword] = useState("");
     const[showPass,setShowPass] = useState(false);
-    useEffect (() => {
-        let token = localStorage.getItem("token");
-        if(token){
-            navigate("/");
-        }
-    },[])
+    const handleBack = () =>{
+        navigate("/")
+    }
+    // useEffect (() => {
+    //     let token = localStorage.getItem("token");
+    //     if(token){
+    //         navigate("/");
+    //     }
+    // },[])
     const handleLogin = async ()=>{
         if(!email || !password){
             toast.error("Email/Password is required!");
@@ -21,8 +28,11 @@ const Login = () =>{
         }
         let res = await loginApi(email,password);
         if(res && res.token){
-            localStorage.setItem("token",res.token);
+            loginContext(email,res.token)
             navigate("/");
+            
+            toast.success("Login thanh cong")
+            
         }else{
             if(res && res.status ===400){
                 toast.error(res.data.error)
@@ -54,7 +64,8 @@ const Login = () =>{
         >
         <i className="fas fa-sync fa-spin"></i>Login</button>
         <div className="back">
-        <i className="fa-solid fa-arrow-left"></i>  Go back
+        <i className="fa-solid fa-arrow-left"></i>  
+        <span onClick={() => handleBack ()}>Go back</span>
         </div>
         </div>
     </>
